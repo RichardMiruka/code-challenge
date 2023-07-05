@@ -41,5 +41,3 @@ class Power(db.Model):
         back_populates='powers'
     )
     
-
-# add any models you may need. 
