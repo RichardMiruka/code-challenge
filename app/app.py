@@ -135,6 +135,59 @@ class PowersById(Resource):
                 jsonify(response_dict), 404
                )
                return response
+           
+    
+  # PATCH /powers/:id
+    def patch(self, id):
+        power = Power.query.filter_by(id=id).first()
+         
+
+        if power:
+            description = request.form.get('description')
+
+            if not description or len(description) < 20:
+                response_dict = {
+                   "errors": ["validation errors"]
+                }
+                response = make_response(jsonify(response_dict), 400)
+                return response
+            for attr in request.form:
+                setattr(power, attr, request.form.get(attr))
+            db.session.add(power)
+            db.session.commit()
+   
+            power_data = {
+                "id": power.id,
+                "name": power.name,
+                "description": power.description,
+                "created_at": power.created_at
+                # "heroes": [
+                #     {
+                #         "strength": hero_p.strength,
+                #         "hero_id": hero_p.hero_id
+                #     }
+                #     for hero_p in power.heroes
+                # ]
+            }
+
+            response = make_response(jsonify(power_data), 200)
+            return response
+        elif not power:
+            response_dict = {
+                "error": "Power not found"
+            }
+            response = make_response(jsonify(response_dict), 404)
+            return response
+        # else:
+        #     response_dict = {
+        #         "errors": ["validation errors"]
+        #     }
+        #     response = make_response(jsonify(response_dict), 404)
+        #     return response
+       
+api.add_resource(PowersById, '/powers/<int:id>')
+
+
     
       
     
