@@ -26,5 +26,20 @@ class Hero(db.Model):
         back_populates='heroes'
     )
     
+class Power(db.Model):
+    __tablename__ = 'powers'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    description = db.Column(db.String(20))
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, onupdate=db.func.now())
+    # hero_ps = db.relationship("Hero_p", backref="power")
+    heroes = db.relationship(
+        'Hero',
+        secondary=hero_power, 
+        back_populates='powers'
+    )
+    
 
 # add any models you may need. 
