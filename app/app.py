@@ -187,13 +187,67 @@ class PowersById(Resource):
        
 api.add_resource(PowersById, '/powers/<int:id>')
 
+# POST (/hero_powers)
 
-    
-      
-    
-    
-    
-                    
-            
+class Hero_powers(Resource):
+    def post(self):
+        valid_strengths = ["Strong", "Weak", "Average"]
+        
+        data = request.get_json()
+        strength = data.get('strength')
+        power_id = data.get('power_id')
+        hero_id = data.get('hero_id')
+        
+        if strength not in valid_strengths:
+            response_dict = {
+                "errors": ["validation errors"]
+            }
+            return make_response(jsonify(response_dict), 400)
+        
+        if strength and power_id and hero_id:
+            hero = Hero.query.get(hero_id)
+            power = Power.query.get(power_id)
+
+            if hero and power:
+                hero_power_entry = hero_power.insert().values(
+                    strength=strength,
+                    power_id=power_id,
+                    hero_id=hero_id
+                )
+
+                db.session.execute(hero_power_entry)
+                db.session.commit()
+
+                hero_data = {
+                    "id": hero.id,
+                    "name": hero.name,
+                    "super_name": hero.super_name,
+                    "powers": [
+                        {
+                            "id": power.id,
+                            "name": power.name,
+                            "description": power.description
+                        }
+                        for power in hero.powers
+                    ]
+                }
+                response = make_response(jsonify(hero_data), 201)
+                return response
+            else:
+                response_dict = {
+                    "error": "Invalid hero_id or power_id"
+                }
+                response = make_response(jsonify(response_dict), 404)
+                return response
+        else:
+            response_dict = {
+                "error": "Missing required fields"
+            }
+            response = make_response(jsonify(response_dict), 400)
+            return response
+              
+api.add_resource(Hero_powers, '/hero_powers')
+
+          
 if __name__ == '__main__':
     app.run(port=5555)
